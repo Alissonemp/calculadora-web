@@ -1,123 +1,110 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Calculadora</title>
   <style>
     body {
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color: #00ff88;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: sans-serif;
+      background: #111;
+      color: #0f0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
-
     .calculadora {
-      background: #111;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #00ff88;
-      padding: 20px;
-      width: 300px;
-    }
-
-    .display {
-      background: #000;
-      color: #00ff88;
-      font-size: 2em;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: right;
-      margin-bottom: 20px;
-      overflow-x: auto;
-    }
-
-    .botoes {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    button {
-      font-size: 1.2em;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
       background: #222;
-      color: #00ff88;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #0f0;
+    }
+    input {
+      width: 100%;
+      font-size: 24px;
+      margin-bottom: 10px;
+      text-align: right;
+      padding: 10px;
+      background: #000;
+      color: #0f0;
+      border: none;
+    }
+    button {
+      width: 22%;
+      margin: 1%;
+      font-size: 20px;
+      padding: 10px;
+      background: #333;
+      color: #0f0;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.3s;
     }
-
     button:hover {
-      background: #00ff88;
+      background: #0f0;
       color: #000;
-    }
-
-    .igual {
-      grid-column: span 2;
-      background: #00ff88;
-      color: #000;
-    }
-
-    .igual:hover {
-      background: #00cc66;
     }
   </style>
 </head>
 <body>
-
   <div class="calculadora">
-    <div class="display" id="display">0</div>
-    <div class="botoes">
-      <button onclick="limpar()">C</button>
-      <button onclick="adicionar('%')">%</button>
-      <button onclick="adicionar('/')">/</button>
-      <button onclick="adicionar('*')">x</button>
-
-      <button onclick="adicionar('7')">7</button>
-      <button onclick="adicionar('8')">8</button>
-      <button onclick="adicionar('9')">9</button>
-      <button onclick="adicionar('-')">-</button>
-
-      <button onclick="adicionar('4')">4</button>
-      <button onclick="adicionar('5')">5</button>
-      <button onclick="adicionar('6')">6</button>
-      <button onclick="adicionar('+')">+</button>
-
-      <button onclick="adicionar('1')">1</button>
-      <button onclick="adicionar('2')">2</button>
-      <button onclick="adicionar('3')">3</button>
-      <button onclick="adicionar('.')">.</button>
-
-      <button onclick="adicionar('0')">0</button>
-      <button class="igual" onclick="calcular()">=</button>
-    </div>
+    <input type="text" id="display" readonly>
+    <br>
+    <button onclick="limpar()">C</button>
+    <button onclick="adicionar('%')">%</button>
+    <button onclick="adicionar('/')">/</button>
+    <button onclick="adicionar('*')">x</button>
+    <br>
+    <button onclick="adicionar('7')">7</button>
+    <button onclick="adicionar('8')">8</button>
+    <button onclick="adicionar('9')">9</button>
+    <button onclick="adicionar('-')">-</button>
+    <br>
+    <button onclick="adicionar('4')">4</button>
+    <button onclick="adicionar('5')">5</button>
+    <button onclick="adicionar('6')">6</button>
+    <button onclick="adicionar('+')">+</button>
+    <br>
+    <button onclick="adicionar('1')">1</button>
+    <button onclick="adicionar('2')">2</button>
+    <button onclick="adicionar('3')">3</button>
+    <button onclick="calcular()">=</button>
+    <br>
+    <button onclick="adicionar('0')">0</button>
+    <button onclick="adicionar('.')">.</button>
   </div>
 
   <script>
-    let display = document.getElementById('display');
+    let display = document.getElementById("display");
 
     function adicionar(valor) {
-      if (display.innerText === '0') {
-        display.innerText = valor;
-      } else {
-        display.innerText += valor;
-      }
+      display.value += valor;
     }
 
     function limpar() {
-      display.innerText = '0';
+      display.value = "";
     }
 
     function calcular() {
+      let expressao = display.value;
+
+      // Detecta padrões como: número [+ ou -] número%
+      expressao = expressao.replace(/(\d+(\.\d+)?)([\+\-])(\d+(\.\d+)?)%/g, function(_, num1, _, operador, porcentagem) {
+        let base = parseFloat(num1);
+        let perc = parseFloat(porcentagem);
+        let resultado = operador === '+' 
+          ? `${base} + (${base} * ${perc} / 100)` 
+          : `${base} - (${base} * ${perc} / 100)`;
+        return resultado;
+      });
+
+      // Também converte 50% → (50/100)
+      expressao = expressao.replace(/(\d+(\.\d+)?)%/g, "($1/100)");
+
       try {
-        display.innerText = eval(display.innerText.replace('x', '*'));
-      } catch {
-        display.innerText = 'Erro';
+        display.value = eval(expressao);
+      } catch (e) {
+        display.value = "Erro";
       }
     }
   </script>
