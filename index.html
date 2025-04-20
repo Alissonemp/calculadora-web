@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Calculadora</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -12,12 +13,15 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .calculadora {
       background: #222;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px #0f0;
+      width: 100%;
+      max-width: 300px;
     }
     input {
       width: 100%;
@@ -28,12 +32,16 @@
       background: #000;
       color: #0f0;
       border: none;
+      border-radius: 5px;
+    }
+    .botoes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
     }
     button {
-      width: 22%;
-      margin: 1%;
       font-size: 20px;
-      padding: 10px;
+      padding: 15px;
       background: #333;
       color: #0f0;
       border: none;
@@ -49,33 +57,34 @@
 <body>
   <div class="calculadora">
     <input type="text" id="display" readonly>
-    <br>
-    <button onclick="limpar()">C</button>
-    <button onclick="adicionar('%')">%</button>
-    <button onclick="adicionar('/')">/</button>
-    <button onclick="adicionar('*')">x</button>
-    <br>
-    <button onclick="adicionar('7')">7</button>
-    <button onclick="adicionar('8')">8</button>
-    <button onclick="adicionar('9')">9</button>
-    <button onclick="adicionar('-')">-</button>
-    <br>
-    <button onclick="adicionar('4')">4</button>
-    <button onclick="adicionar('5')">5</button>
-    <button onclick="adicionar('6')">6</button>
-    <button onclick="adicionar('+')">+</button>
-    <br>
-    <button onclick="adicionar('1')">1</button>
-    <button onclick="adicionar('2')">2</button>
-    <button onclick="adicionar('3')">3</button>
-    <button onclick="calcular()">=</button>
-    <br>
-    <button onclick="adicionar('0')">0</button>
-    <button onclick="adicionar('.')">.</button>
+    <div class="botoes">
+      <button onclick="limpar()">C</button>
+      <button onclick="adicionar('%')">%</button>
+      <button onclick="adicionar('/')">/</button>
+      <button onclick="adicionar('*')">x</button>
+      
+      <button onclick="adicionar('7')">7</button>
+      <button onclick="adicionar('8')">8</button>
+      <button onclick="adicionar('9')">9</button>
+      <button onclick="adicionar('-')">-</button>
+      
+      <button onclick="adicionar('4')">4</button>
+      <button onclick="adicionar('5')">5</button>
+      <button onclick="adicionar('6')">6</button>
+      <button onclick="adicionar('+')">+</button>
+      
+      <button onclick="adicionar('1')">1</button>
+      <button onclick="adicionar('2')">2</button>
+      <button onclick="adicionar('3')">3</button>
+      <button onclick="calcular()">=</button>
+      
+      <button onclick="adicionar('0')">0</button>
+      <button onclick="adicionar('.')">.</button>
+    </div>
   </div>
 
   <script>
-    let display = document.getElementById("display");
+    const display = document.getElementById("display");
 
     function adicionar(valor) {
       display.value += valor;
@@ -88,18 +97,13 @@
     function calcular() {
       let expressao = display.value;
 
-      // Detecta padrões como: número [+ ou -] número%
-      expressao = expressao.replace(/(\d+(\.\d+)?)([\+\-])(\d+(\.\d+)?)%/g, function(_, num1, _, operador, porcentagem) {
-        let base = parseFloat(num1);
-        let perc = parseFloat(porcentagem);
-        let resultado = operador === '+' 
-          ? `${base} + (${base} * ${perc} / 100)` 
-          : `${base} - (${base} * ${perc} / 100)`;
-        return resultado;
+      // Trata porcentagem no formato: 200 + 10% → 200 + (200 * 10 / 100)
+      expressao = expressao.replace(/(\d+(?:\.\d+)?)([+\-])(\d+(?:\.\d+)?)%/g, (match, base, op, perc) => {
+        return `${base}${op}(${base}*${perc}/100)`;
       });
 
-      // Também converte 50% → (50/100)
-      expressao = expressao.replace(/(\d+(\.\d+)?)%/g, "($1/100)");
+      // Trata valores soltos com %: 50% → 50/100
+      expressao = expressao.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
 
       try {
         display.value = eval(expressao);
